@@ -7,6 +7,7 @@ import numpy as np
 # Outputs: 3D-tensor that can feed into the decoder
 # Output shape = [batch_size, 4, 4, 4, Nh]
 # where Nh is the hidden state size
+
 def simple_lstm(inputs, Nh=4, initializer=None):
     num_hidden = 4**3 * Nh
 

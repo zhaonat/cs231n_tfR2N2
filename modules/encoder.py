@@ -3,14 +3,7 @@ import tensorflow as tf
 def encoder(input_image):
     '''
     #input image should be a tensorflow tensor
-    should accge,
-      filters=32,
-      kernel_size=[7,7],
-      padding="same",
-      activation=tf.nn.relu)    
-    #add a maxpool
-    pool7 = tf.layers.max_pooling2d(inputs=conv7, pool_size=[2, 2], strides=2)
-    ept an input 127x127 rgb image (W x H x C); #color channels should be last dim
+    should an input 127x127 rgb image (W x H x C); #color channels should be last dim
     should ouput a dense representation or encoding
     '''
 
@@ -39,4 +32,5 @@ def encoder(input_image):
     
     #run this
     return dense;
-    
+
+
