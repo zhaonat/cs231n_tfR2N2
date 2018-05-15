@@ -37,7 +37,9 @@ sample_model = down_y[0]; print(sample_model.shape)
 
 ## convert everything to arrays
 y = np.array(down_y)
-
+#convert to one hot
+y_one_hot = np.stack((y==1, y==0))
+y_one_hot = np.transpose(y_one_hot, axes = [1,2,3,4,0])
 # plt.figure();
 # plt.imshow(sample_image[:,:,0:3]);
 # plt.show()
@@ -74,7 +76,7 @@ print(conv_lstm_hidden.shape)
 
 ##decode the lstm output, which is just the hidden state, 3D
 # pass it through the decoder
-n_deconvfilter = [128, 128, 128, 64, 32, 1]
+n_deconvfilter = [128, 128, 128, 64, 32, 2]
 logits = decoder.decoder(conv_lstm_hidden, n_deconvfilter)
 
 #squeeze logits so it is 4 dimensional
@@ -83,10 +85,13 @@ logits = tf.squeeze(logits);
 print('final output shape:')
 print(logits.shape)
 
-## define loss function
-outputs = tf.nn.sigmoid(logits) #we want to apply softmax on each pixel separately
-
-loss = tf.layers.flatten(outputs)
+outputs = tf.contrib.layers.softmax(logits)
+print(outputs.shape)
+loss = tf.nn.softmax_cross_entropy_with_logits_v2(
+    labels=y_one_hot,
+    logits=logits,
+)
+loss = tf.layers.flatten(loss)
 loss = tf.reduce_mean(loss);
 
 ## define optimizer
@@ -99,5 +104,6 @@ sess = tf.Session()
 sess.run(init)
 epochs = 10;
 for epoch in range(epochs):
+    sess.run(optimizer, feed_dict = {i: d for i, d in zip(sequence, X_final)})
     print(sess.run(loss, feed_dict = {i: d for i, d in zip(sequence, X_final)}))
     #predictions = tf.argmax(outputs, axis = 4)

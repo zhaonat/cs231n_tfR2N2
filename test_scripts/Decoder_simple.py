@@ -32,7 +32,7 @@ conv3 = tf.layers.conv3d( inputs = unpool3, filters = n_deconvfilter[3], kernel_
 conv4 = tf.layers.conv3d( inputs = conv3, filters = n_deconvfilter[4], kernel_size = 3, padding="same", activation = tf.nn.leaky_relu )
 
 logits = tf.layers.conv3d( inputs = conv4, filters = n_deconvfilter[5], kernel_size = 3, padding="same")
-
+print(logits.shape)
 outputs = tf.contrib.layers.softmax(logits)
 
 
