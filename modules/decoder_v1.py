@@ -4,8 +4,7 @@ import random
 import tensorflow as tf
 
 # Define the model structure
-def decoder( inputs, in_dim, batch_size, n_deconvfilter):
-    # n_deconvfilter = [4, 4, 4, 4, 4, 2]
+def decoder_simple( inputs, in_dim, batch_size, n_deconvfilter):
     initializer = tf.variance_scaling_initializer(scale=2.0)
 
     # Define the model structure
@@ -25,9 +24,9 @@ def decoder( inputs, in_dim, batch_size, n_deconvfilter):
 
     logits = tf.layers.conv3d( inputs = X, filters = n_deconvfilter[5], kernel_size = 3, padding="same")
 
-    outputs = tf.contrib.layers.softmax(logits)
+    # outputs = tf.contrib.layers.softmax(logits)
 
-    return [logits, outputs]
+    return logits
 
 
 # Calculate the loss
@@ -42,7 +41,8 @@ def decoder_loss( logits, labels, out_dim, batch_size ):
 
 
 # Predict 3D objects in voxels
-def decoder_predict( outputs ):
+def decoder_predict( logits ):
+    outputs = tf.contrib.layers.softmax(logits)
     predictions = tf.argmax(outputs, axis = 4)
     return predictions
 
@@ -64,9 +64,8 @@ def go_one_hot( y, batch_size, out_dim ):
 
 # print and record performance
 def print_performance(i, results, loss_history, acc_history, i_history, y):
-    object = results[0]
-    loss_test = results[1]
-    prediction = results[2]
+    loss_test = results[0]
+    prediction = results[1]
     accuracy = np.sum( prediction.reshape(y.shape) == y) / y.size
     loss_history.append(loss_test)
     acc_history.append(accuracy)
@@ -85,7 +84,7 @@ def train_decoder():
     batch_size = 1
     learning_rate = 5e-4
     # Define the number of filters in each conv layer
-    n_deconvfilter = [32, 32, 32, 16, 8, 2]
+    n_deconvfilter = [128, 128, 128, 64, 32, 2]
 
     # Training data
     X_train = np.random.rand(batch_size, in_dim, in_dim, in_dim, 2)
@@ -102,9 +101,9 @@ def train_decoder():
      #labels should be in one-hot form (2 classes)
     labels = tf.placeholder(tf.float32, shape = [batch_size, out_dim, out_dim, out_dim, 2])
 
-    [logits, outputs] = decoder_simple( inputs, in_dim, batch_size, n_deconvfilter )
+    logits = decoder_simple( inputs, in_dim, batch_size, n_deconvfilter )
     loss = decoder_loss( logits, labels, out_dim, batch_size )
-    predictions = decoder_predict( outputs )
+    predictions = decoder_predict( logits)
     optimizer = decoder_optimize( loss,learning_rate )
 
     # Train the model
@@ -121,7 +120,7 @@ def train_decoder():
 
     for i in range(epochs):
         if i%5 == 0:
-            results = sess.run([outputs, loss, predictions], feed_dict = {inputs: X_train, labels: y_train_onehot})
+            results = sess.run([loss, predictions], feed_dict = {inputs: X_train, labels: y_train_onehot})
             [loss_history, acc_history, i_history] = print_performance(i, results, loss_history, acc_history, i_history, y_train)
 
         for j in range(num_batches):
