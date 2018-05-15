@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+# Do NOT write None for batch_size
+
 # LSTM cell class.
 # This is similar to tf.nn.rnn_cell.LSTMCell with state_is_tuple=True.
 # It has the potential of being modified to a 3D convolutional LSTM.
