@@ -4,7 +4,7 @@ import random
 import tensorflow as tf
 
 # Define the model structure
-def decoder_simple( inputs, in_dim, batch_size, n_deconvfilter):
+def decoder( inputs, in_dim, batch_size, n_deconvfilter):
     # n_deconvfilter = [4, 4, 4, 4, 4, 2]
     initializer = tf.variance_scaling_initializer(scale=2.0)
 
