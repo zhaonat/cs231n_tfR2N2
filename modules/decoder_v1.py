@@ -24,8 +24,6 @@ def decoder_simple( inputs, in_dim, batch_size, n_deconvfilter):
 
     logits = tf.layers.conv3d( inputs = X, filters = n_deconvfilter[5], kernel_size = 3, padding="same")
 
-    # outputs = tf.contrib.layers.softmax(logits)
-
     return logits
 
 
