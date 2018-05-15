@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 def encoder(input_image):
     '''
     #input image should be a tensorflow tensor
@@ -13,7 +15,13 @@ def encoder(input_image):
     '''
 
     conv7 = tf.layers.conv2d(
-      inputs=input_ima
+      inputs=input_image,
+          filters=32,
+          kernel_size=[1,1],
+          padding="same",
+          activation=tf.nn.relu)
+    pool7 = tf.layers.max_pooling2d(inputs=conv7, pool_size=[2, 2], strides=2)
+
     #use a for loop for the remaining 5 3x3 convs
     for i in range(5):
         conv3 = tf.layers.conv2d(

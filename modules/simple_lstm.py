@@ -70,4 +70,4 @@ def train_simple_lstm(seq_length=5, encoded_size=1):
                 print('Train accuracy: %f. Loss: %f.' % (np.mean((results_train_batch[0]>0) == y_train_batch), results_train_batch[1]))
                 print('Test accuracy: %f. Loss: %f.' % (np.mean((results_test[0]>0) == y_test), results_test[1]))
 
-train_simple_lstm()
+#train_simple_lstm()
