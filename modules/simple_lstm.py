@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 # Inputs: sequences of 1024-entry vectors
-# Input shape is [batch_size, sequence_length, encoded_size]
+# Input shape is [batch_size, time_steps, num_features]
 #
 # Outputs: 3D-tensor that can feed into the decoder
 # Output shape = [batch_size, 4, 4, 4, Nh]
@@ -12,29 +12,29 @@ def simple_lstm(inputs, Nh=4, initializer=None):
     num_hidden = 4**3 * Nh
 
     cell = tf.nn.rnn_cell.LSTMCell(num_hidden, initializer=initializer, state_is_tuple=True)
-    hidden_state, cell_state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
+    hidden_states, state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
 
-    hidden_state = tf.transpose(hidden_state, [1, 0, 2])
-    outputs = hidden_state[-1]
+    hidden_states = tf.transpose(hidden_states, [1, 0, 2])
+    outputs = hidden_states[-1]
     outputs = tf.reshape(outputs, [-1, 4, 4 ,4, Nh])
     return outputs
 
 # Train the LSTM above on a simple task of counting the number of 1s
 # in a given sequence, and outputs if the number is even or odd
-def train_simple_lstm(seq_length=5, encoded_size=1):
+def train_simple_lstm(time_steps=5, num_features=1):
     # Data
     train_num = 10000
-    X_train = np.random.randint(2, size=[train_num, seq_length, encoded_size])
+    X_train = np.random.randint(2, size=[train_num, time_steps, num_features])
     y_train = np.sum(X_train, axis=(1,2)) % 2
     y_train = y_train.reshape([-1, 1])
 
     test_num = 100
-    X_test = np.random.randint(2, size=[test_num, seq_length, encoded_size])
+    X_test = np.random.randint(2, size=[test_num, time_steps, num_features])
     y_test = np.sum(X_test, axis=(1,2)) % 2
     y_test = y_test.reshape([-1, 1])
 
     # Place holders
-    inputs = tf.placeholder(tf.float32, shape=[None, seq_length, encoded_size])
+    inputs = tf.placeholder(tf.float32, shape=[None, time_steps, num_features])
     labels = tf.placeholder(tf.float32, shape=[None, 1])
 
     initializer = tf.variance_scaling_initializer(scale=2.0)
@@ -42,7 +42,6 @@ def train_simple_lstm(seq_length=5, encoded_size=1):
     # Network structure
     X = simple_lstm(inputs)
     X = tf.layers.flatten(X)
-    # X = tf.layers.dense(X, 10, activation=tf.nn.relu, kernel_initializer=initializer)
     outputs = tf.layers.dense(X, 1, kernel_initializer=initializer)
 
     loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=outputs)
@@ -71,4 +70,4 @@ def train_simple_lstm(seq_length=5, encoded_size=1):
                 print('Train accuracy: %f. Loss: %f.' % (np.mean((results_train_batch[0]>0) == y_train_batch), results_train_batch[1]))
                 print('Test accuracy: %f. Loss: %f.' % (np.mean((results_test[0]>0) == y_test), results_test[1]))
 
-#train_simple_lstm()
+# train_simple_lstm()
