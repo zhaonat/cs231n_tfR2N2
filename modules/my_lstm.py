@@ -88,43 +88,43 @@ def my_lstm(inputs, Nh=4):
     return outputs
 
 # Creates sin sequence data. Can be used to train a regression problem.
-def sin_data(data_num, time_steps=10):
+def sin_data(data_size, time_steps=10):
     X = []
     y = []
-    for i in range(data_num):
+    for i in range(data_size):
         offset = np.random.randn()
         ratio = np.random.randn()
         X.append(np.sin((np.arange(time_steps) + offset) * ratio))
         y.append(np.sin((time_steps + offset) * ratio))
     X = np.array(X)
     y = np.array(y)
-    X = X.reshape([data_num, time_steps, 1])
-    y = y.reshape([data_num, 1])
+    X = X.reshape([data_size, time_steps, 1])
+    y = y.reshape([data_size, 1])
     return X, y
 
 # Creates binary sequence data. Can be used to train a classification problem.
-def binary_data(data_num, time_steps=10):
-    X = np.random.randint(2, size=[data_num, time_steps, 1])
+def binary_data(data_size, time_steps=10):
+    X = np.random.randint(2, size=[data_size, time_steps, 1])
     y = np.sum(X, axis=(1,2)) % 2
-    y = y.reshape([data_num, 1])
+    y = y.reshape([data_size, 1])
     return X, y
 
 # Train the LSTM to make sure it works properly.
 def train_my_lstm():
     # Data
-    train_num = 10000
-    test_num = 100
+    train_size = 10000
+    test_size = 100
     batch_size = 100
     time_steps = 5
     num_features = 1
 
     problem_type = 'regression'
-    X_train, y_train = sin_data(train_num, time_steps=time_steps)
-    X_test, y_test = sin_data(test_num, time_steps=time_steps)
+    X_train, y_train = sin_data(train_size, time_steps=time_steps)
+    X_test, y_test = sin_data(test_size, time_steps=time_steps)
 
     # problem_type = 'binary_classification'
-    # X_train, y_train = binary_data(train_num, time_steps=time_steps)
-    # X_test, y_test = binary_data(test_num, time_steps=time_steps)
+    # X_train, y_train = binary_data(train_size, time_steps=time_steps)
+    # X_test, y_test = binary_data(test_size, time_steps=time_steps)
 
     # Place holders. Do NOT write None for batch_size
     inputs = tf.placeholder(tf.float32, shape=[batch_size, time_steps, num_features])
@@ -152,7 +152,7 @@ def train_my_lstm():
     sess.run(init)
 
     for epoch_index in range(20):
-        for batch_index in range(train_num // batch_size):
+        for batch_index in range(train_size // batch_size):
             X_train_batch = X_train[batch_index*batch_size : (batch_index+1)*batch_size]
             y_train_batch = y_train[batch_index*batch_size : (batch_index+1)*batch_size]
 
