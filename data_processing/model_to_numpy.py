@@ -34,10 +34,13 @@ with open(file, 'rb') as f:
 # second key is: voxel_model
 
 data_dict = dict();
-counter = 0;
+counter = 1;
+batch_counter = 1
+data_dict = dict();
+
 for item in os.listdir(os.path.join(model_dir, '02691156')):
     counter+=1;
-    print('item: '+str(counter))
+    #print('item: '+str(counter))
     model_id = item;
     if(model_id in data_dict.keys() ):
         continue;
@@ -57,7 +60,12 @@ for item in os.listdir(os.path.join(model_dir, '02691156')):
     with open(file, 'rb') as f:
         model = brp.read_as_3d_array(f)
     data_dict[model_id]['voxel_model'] = model.data;
-    if(counter > 8):
+    if(counter % 8 == 0):
+        print('batch done');
+        print(data_dict.keys())
+        pickle.dump(data_dict, open('R2N2_9_batch_'+str(batch_counter)+'.p', 'wb'));
+        batch_counter+=1;
+        data_dict = dict();
+
+    if(counter> 256):
         break;
-print('Done mining');
-pickle.dump(data_dict, open('R2N2_9_batch_data.p', 'wb'));

@@ -8,7 +8,6 @@ import os
 import pickle
 from data_processing import pickle_to_data
 
-#import matplotlib.pyplot as plt
 from data_processing import subsample_voxel
 data_dir = os.path.join(settings.ROOT_DIR, 'data_sample');
 f = open(os.path.join(data_dir, 'R2N2_9_batch_data.p'), 'rb');
@@ -16,6 +15,7 @@ f = open(os.path.join(data_dir, 'R2N2_9_batch_data.p'), 'rb');
 batch_sample = pickle.load(f);
 print(batch_sample.keys())
 X, y = pickle_to_data.unravel_batch_pickle(batch_sample)
+y0 = y;
 X_nparr = np.array(X);
 batch_size,T,H,W,C = X_nparr.shape;
 
@@ -38,13 +38,11 @@ sample_model = down_y[0]; print(sample_model.shape)
 ## convert everything to arrays
 y = np.array(down_y)
 #convert to one hot
-y_one_hot = np.stack((y==1, y==0))
+y_one_hot = np.stack((y==0, y==1))
 y_one_hot = np.transpose(y_one_hot, axes = [1,2,3,4,0])
 # plt.figure();
 # plt.imshow(sample_image[:,:,0:3]);
 # plt.show()
-
-
 
 #sequence_placeholder = tf.placeholder(tf.float32, shape = [batch_size,T,H,W,C])
 sequence_placeholder = tf.placeholder(tf.float32, shape = [T,batch_size,H,W,C])
@@ -98,12 +96,48 @@ loss = tf.reduce_mean(loss);
 optimizer = tf.train.AdamOptimizer(1e-4)
 optimizer = optimizer.minimize(loss)
 
+#
+predictions = tf.argmax(outputs, axis = 4)
+print(predictions.shape)
+
 ## =================== RUN TENSORFLOW SESSION ==================##
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
-epochs = 10;
+epochs = 5000;
+loss_history = list(); accuracy = list()
 for epoch in range(epochs):
     sess.run(optimizer, feed_dict = {i: d for i, d in zip(sequence, X_final)})
-    print(sess.run(loss, feed_dict = {i: d for i, d in zip(sequence, X_final)}))
+    loss_epoch = sess.run(loss, feed_dict = {i: d for i, d in zip(sequence, X_final)})
+
+    prediction = sess.run(predictions, feed_dict = {i: d for i, d in zip(sequence, X_final)})
+    print(prediction.shape)
+    print(np.mean(prediction == y))
+    accuracy.append(np.mean(prediction == y))
+
+    print(loss_epoch)
+    loss_history.append(loss_epoch);
     #predictions = tf.argmax(outputs, axis = 4)
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+for j in range(batch_size):
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.voxels(prediction[j,:,:,:], edgecolor='k')
+plt.show();
+
+for i in range(batch_size):
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.voxels(y[i,:,:,:], edgecolor='k')
+plt.show();
+
+
+plt.figure();
+
+plt.plot(loss_history)
+plt.show()
+
+plt.plot(accuracy)
