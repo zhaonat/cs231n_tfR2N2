@@ -4,7 +4,7 @@ import random
 import tensorflow as tf
 
 # Define the model structure
-def decoder_simple( inputs, in_dim, batch_size, n_deconvfilter):
+def decoder_simple( inputs,  n_deconvfilter):
     initializer = tf.variance_scaling_initializer(scale=2.0)
 
     # Define the model structure
@@ -142,4 +142,4 @@ def train_decoder():
     plt.show()
 
 # Run the training process
-train_decoder()
+#train_decoder()

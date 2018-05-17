@@ -6,11 +6,12 @@ from modules import simple_lstm
 import settings
 import os
 import pickle
+from data_processing import intersection_over_union as iou
 from data_processing import pickle_to_data
 
 from data_processing import subsample_voxel
 data_dir = os.path.join(settings.ROOT_DIR, 'data_sample');
-f = open(os.path.join(data_dir, 'R2N2_9_batch_data.p'), 'rb');
+f = open(os.path.join(data_dir, 'R2N2_9_batch_3.p'), 'rb');
 
 batch_sample = pickle.load(f);
 print(batch_sample.keys())
@@ -29,7 +30,7 @@ X_final = [X_permute[t, :,:,:,:] for t in range(T)];
 
 ## perform downsampling
 down_y = list();
-strides = [4,4,4]
+strides = [1,1,1]
 for i in range(len(y)):
     down_y.append(subsample_voxel.downsample(y[i], strides))
 sample_model = down_y[0]; print(sample_model.shape)
@@ -37,6 +38,8 @@ sample_model = down_y[0]; print(sample_model.shape)
 
 ## convert everything to arrays
 y = np.array(down_y)
+print('voxel shape')
+print(y.shape)
 #convert to one hot
 y_one_hot = np.stack((y==0, y==1))
 y_one_hot = np.transpose(y_one_hot, axes = [1,2,3,4,0])
@@ -53,7 +56,7 @@ label_placeholder = tf.placeholder(tf.float32, shape = [batch_size, NX,NY,NZ]);
 sequence = [image_placeholder for i in range(T)]
 encoded_sequence = list();
 for image in sequence:
-    encoded_out = encoder.encoder(image);
+    encoded_out = encoder.encoder_z(image);
     encoded_sequence.append(encoded_out);
 
 #check type of encoded sequence
@@ -93,51 +96,99 @@ loss = tf.layers.flatten(loss)
 loss = tf.reduce_mean(loss);
 
 ## define optimizer
-optimizer = tf.train.AdamOptimizer(1e-4)
+optimizer = tf.train.AdamOptimizer(2e-4)
 optimizer = optimizer.minimize(loss)
 
-#
 predictions = tf.argmax(outputs, axis = 4)
 print(predictions.shape)
+
+
 
 ## =================== RUN TENSORFLOW SESSION ==================##
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
-epochs = 5000;
+epochs = 300;
 loss_history = list(); accuracy = list()
 for epoch in range(epochs):
     sess.run(optimizer, feed_dict = {i: d for i, d in zip(sequence, X_final)})
     loss_epoch = sess.run(loss, feed_dict = {i: d for i, d in zip(sequence, X_final)})
 
     prediction = sess.run(predictions, feed_dict = {i: d for i, d in zip(sequence, X_final)})
-    print(prediction.shape)
-    print(np.mean(prediction == y))
+    if(epoch%20 == 0):
+        print('epoch: '+str(epoch)+' loss: '+str(loss_epoch))
+        print(prediction.shape)
+        print(np.mean(prediction == y))
+        for k in range(batch_size):
+            print(iou.IoU_3D(y[k, :, :, :], prediction[k, :, :, :]))
+    loss_history.append(loss_epoch);
     accuracy.append(np.mean(prediction == y))
 
-    print(loss_epoch)
-    loss_history.append(loss_epoch);
+
+
     #predictions = tf.argmax(outputs, axis = 4)
 
+
+
+## ======================  run the test batch ==========================================
+f = open(os.path.join(data_dir, 'R2N2_9_batch_4.p'), 'rb');
+batch_sample_2 = pickle.load(f);
+X, y = pickle_to_data.unravel_batch_pickle(batch_sample_2)
+X_nparr = np.array(X);
+batch_size,T,H,W,C = X_nparr.shape;
+X_permute = np.transpose(X_nparr, axes = [1,0,2,3,4])
+
+X_final = [X_permute[t, :,:,:,:] for t in range(T)];
+
+## perform downsampling
+down_y = list();
+strides = [1,1,1]
+for i in range(len(y)):
+    down_y.append(subsample_voxel.downsample(y[i], strides))
+sample_model = down_y[0]; print(sample_model.shape)
+[NX,NY,NZ] = sample_model.shape;
+
+
+
+## convert everything to arrays
+y = np.array(down_y)
+print('voxel shape')
+print(y.shape)
+
+print('run test case')
+test_loss= sess.run(loss, feed_dict={i: d for i, d in zip(sequence, X_final)})
+test_prediction = sess.run(predictions, feed_dict={i: d for i, d in zip(sequence, X_final)})
+test_iou = list();
+for k in range(batch_size):
+    print(iou.IoU_3D(y[k, :, :, :], test_prediction[k, :, :, :]))
+    test_iou.append(iou.IoU_3D(y[k, :, :, :], test_prediction[k, :, :, :]))
+
+print('test_loss')
+print(test_loss)
+print(np.mean(test_iou))
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 for j in range(batch_size):
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
+    fig = plt.figure(figsize = (20,8))
+    ax = fig.add_subplot(1,2, 1, projection='3d')
     ax.voxels(prediction[j,:,:,:], edgecolor='k')
-plt.show();
-
-for i in range(batch_size):
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.voxels(y[i,:,:,:], edgecolor='k')
+    ax.set(xlabel='x', ylabel='y', zlabel='z', title='prediction')
+    ax = fig.add_subplot(1,2, 2, projection='3d')
+    ax.voxels(y[j,:,:,:], edgecolor='k', facecolor = 'blue')
+    ax.set(xlabel='x', ylabel='y', zlabel='z', title='original model')
 plt.show();
 
 
 plt.figure();
-
+plt.subplot(121)
 plt.plot(loss_history)
-plt.show()
-
+plt.xlabel('epoch')
+plt.ylabel('loss')
+plt.title('Sample R2N2 Preliminary Module Loss')
+plt.subplot(122)
 plt.plot(accuracy)
+plt.xlabel('epoch')
+plt.ylabel('accuracy')
+plt.title('Sample R2N2 Preliminary Module Acc')
+plt.show()

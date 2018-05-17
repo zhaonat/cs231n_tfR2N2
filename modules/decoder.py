@@ -19,6 +19,8 @@ def decoder(inputs, n_deconvfilter):
     conv2 = tf.layers.conv3d(inputs=unpool2, filters=n_deconvfilter[2], kernel_size=3, padding="same",
                              activation=tf.nn.leaky_relu)
 
+    #at this point, the output shape be (16,16,16)
+
     unpool3 = tf.keras.layers.UpSampling3D(size=[2, 2, 2])(conv2)
     # unpool3 = tf.layers.conv3d_transpose( inputs=conv2, filters = n_deconvfilter[2] , kernel_size=2)
     conv3 = tf.layers.conv3d(inputs=unpool3, filters=n_deconvfilter[3], kernel_size=3, padding="same",

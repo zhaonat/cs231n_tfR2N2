@@ -5,6 +5,8 @@ analyzes the shapenet core models and converts them to 3d numpy arrays
 import os
 import numpy as np
 import binvox_rw as brp
+import subsample_voxel as sv
+from data_processing import densify_voxel as dv
 #from settings import *
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -59,13 +61,20 @@ for item in os.listdir(os.path.join(model_dir, '02691156')):
     file = os.path.join(voxel_dir, 'model_normalized.solid.binvox');
     with open(file, 'rb') as f:
         model = brp.read_as_3d_array(f)
-    data_dict[model_id]['voxel_model'] = model.data;
-    if(counter % 8 == 0):
+
+    ## subsample the voxel model
+    sub_image = model.data[:, 0:32, :] #doing this crop is sufficient!
+    print(np.sum(sub_image) / np.prod(sub_image.shape))
+    sampled = sv.downsample(sub_image, stride=[4, 1, 4])
+    print(sampled.shape)
+    data_dict[model_id]['voxel_model'] = sampled;
+    batch_size = 8
+    if(counter % batch_size == 0):
         print('batch done');
         print(data_dict.keys())
-        pickle.dump(data_dict, open('R2N2_9_batch_'+str(batch_counter)+'.p', 'wb'));
+        pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
         batch_counter+=1;
         data_dict = dict();
 
-    if(counter> 256):
+    if(counter> 128):
         break;
