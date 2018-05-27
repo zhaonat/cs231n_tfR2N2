@@ -108,7 +108,7 @@ print(predictions.shape)
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
-epochs = 300;
+epochs = 1000;
 loss_history = list(); accuracy = list()
 for epoch in range(epochs):
     sess.run(optimizer, feed_dict = {i: d for i, d in zip(sequence, X_final)})
@@ -123,8 +123,6 @@ for epoch in range(epochs):
             print(iou.IoU_3D(y[k, :, :, :], prediction[k, :, :, :]))
     loss_history.append(loss_epoch);
     accuracy.append(np.mean(prediction == y))
-
-
 
     #predictions = tf.argmax(outputs, axis = 4)
 
@@ -181,13 +179,13 @@ plt.show();
 
 
 plt.figure();
-plt.subplot(121)
+plt.subplot(211)
 plt.plot(loss_history)
 plt.xlabel('epoch')
 plt.ylabel('loss')
 plt.title('Sample R2N2 Preliminary Module Loss')
-plt.subplot(122)
-plt.plot(accuracy)
+plt.subplot(212)
+plt.plot(accuracy, 'b-')
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 plt.title('Sample R2N2 Preliminary Module Acc')

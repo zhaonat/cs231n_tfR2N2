@@ -47,7 +47,8 @@ mini_batch_size = 8;
 #sequence_placeholder = tf.placeholder(tf.float32, shape = [batch_size,T,H,W,C])
 sequence_placeholder = tf.placeholder(tf.float32, shape = [T,mini_batch_size,H,W,C])
 image_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size,H,W,C])
-label_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size, NX,NY,NZ]);
+#need the 2 because of one-hot encoding for softmax
+label_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size, NX,NY,NZ, 2]);
 
 ## specify total graph
 sequence = [image_placeholder for i in range(T)]
@@ -85,8 +86,9 @@ print(logits.shape)
 
 outputs = tf.contrib.layers.softmax(logits)
 print(outputs.shape)
+print(label_placeholder.shape)
 loss = tf.nn.softmax_cross_entropy_with_logits_v2(
-    labels=y_one_hot, #this poses a problem for mini batch learning
+    labels=label_placeholder, #this poses a problem for mini batch learning
     logits=logits,
 )
 loss = tf.layers.flatten(loss)
@@ -117,7 +119,9 @@ for epoch in range(epochs):
         #need to determine X_final
         start = i*mini_batch_size; end = (i+1)*mini_batch_size;
 
-        y_batch = y[start:end];
+        y_batch = y_one_hot[start:end];
+        # print('y_batch shape')
+        # print(y_batch.shape)
         X_batch = X_nparr[start:end, :, :, :, :]
 
         X_batch = np.transpose(X_batch, axes=[1, 0, 2, 3, 4])
@@ -125,27 +129,31 @@ for epoch in range(epochs):
         ## convert this back to a list of arrs
         X_final = [X_batch[t, :, :, :, :] for t in range(T)];
 
-        sess.run(optimizer, feed_dict = {i: d for i, d in zip(sequence, X_final)})
-        loss_epoch = sess.run(loss, feed_dict = {i: d for i, d in zip(sequence, X_final)})
+        feed_dict_input = {i: d for i, d in zip(sequence, X_final)};
+        feed_dict_input[label_placeholder] = y_batch;
+        #manually insert the label_placeholder
 
-        prediction = sess.run(predictions, feed_dict = {i: d for i, d in zip(sequence, X_final)})
 
-        accuracy.append(np.mean(prediction == y))
-        if(epoch%20 == 0):
-            print('epoch: '+str(epoch)+' loss: '+str(loss_epoch))
-            print(prediction.shape)
-            print(np.mean(prediction == y))
-        loss_history.append(loss_epoch);
+        sess.run(optimizer, feed_dict = feed_dict_input)
+        loss_epoch = sess.run(loss, feed_dict = feed_dict_input)
+
+        #reconfigure feed_dict to accept a place_holder for y
+        prediction = sess.run(predictions, feed_dict = feed_dict_input)
+
+        accuracy.append(np.mean(prediction == y_batch))
+
+    print('epoch: '+str(epoch)+' loss: '+str(loss_epoch))
+    print(prediction.shape)
+    print(np.mean(prediction == y))
+    loss_history.append(loss_epoch);
         #predictions = tf.argmax(outputs, axis = 4)
 
 
 #Now, save the graph
-saver.save(sess, 'R2N2_128_weight_train',global_step=1000)
-
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-for j in range(batch_size):
+for j in range(batch_size-1):
     fig = plt.figure(figsize = (20,8))
     ax = fig.add_subplot(1,2, 1, projection='3d')
     ax.voxels(prediction[j,:,:,:], edgecolor='k')
@@ -169,4 +177,5 @@ plt.plot(accuracy)
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 plt.title('Sample R2N2 Preliminary Module Acc')
+plt.tight_layout();
 plt.show()
