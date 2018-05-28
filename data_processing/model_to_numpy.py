@@ -6,7 +6,7 @@ import os
 import numpy as np
 import binvox_rw as brp
 import subsample_voxel as sv
-from data_processing import densify_voxel as dv
+import densify_voxel as dv
 #from settings import *
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -39,7 +39,7 @@ data_dict = dict();
 counter = 1;
 batch_counter = 1
 data_dict = dict();
-
+batch_size = 1600
 for item in os.listdir(os.path.join(model_dir, '02691156')):
     counter+=1;
     #print('item: '+str(counter))
@@ -68,13 +68,17 @@ for item in os.listdir(os.path.join(model_dir, '02691156')):
     sampled = sv.downsample(sub_image, stride=[4, 1, 4])
     print(sampled.shape)
     data_dict[model_id]['voxel_model'] = sampled;
-    batch_size = 8
-    if(counter % batch_size == 0):
-        print('batch done');
-        print(data_dict.keys())
-        pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
-        batch_counter+=1;
-        data_dict = dict();
+    # if(counter % batch_size == 0):
+    #     print('batch done');
+    #     print(data_dict.keys())
+    #     pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
+    #     batch_counter+=1;
+    #     data_dict = dict();
 
-    if(counter> 128):
+    if(counter> batch_size):
         break;
+print('batch done');
+print(data_dict.keys())
+pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
+batch_counter+=1;
+data_dict = dict();

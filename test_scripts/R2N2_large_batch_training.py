@@ -6,21 +6,23 @@ from modules import simple_lstm
 import settings
 import os
 import pickle
+from data_processing import intersection_over_union as iou
+
 from data_processing import pickle_to_data
 '''
 this takes a while to run
 '''
 from data_processing import subsample_voxel
 data_dir = os.path.join(settings.ROOT_DIR, 'data', 'shape_net_training_test');
-f = open(os.path.join(data_dir, 'R2N2_128_batch_1.p'), 'rb');
+f = open(os.path.join(data_dir, 'R2N2_1024_batch_1.p'), 'rb');
 
 batch_sample = pickle.load(f);
 print(batch_sample.keys())
+sample_keys = list(batch_sample.keys())
 X, y = pickle_to_data.unravel_batch_pickle(batch_sample)
 y0 = y;
 X_nparr = np.array(X);
 batch_size,T,H,W,C = X_nparr.shape;
-
 
 
 ## perform downsampling
@@ -45,10 +47,10 @@ y_one_hot = np.transpose(y_one_hot, axes = [1,2,3,4,0])
 mini_batch_size = 8;
 
 #sequence_placeholder = tf.placeholder(tf.float32, shape = [batch_size,T,H,W,C])
-sequence_placeholder = tf.placeholder(tf.float32, shape = [T,mini_batch_size,H,W,C])
-image_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size,H,W,C])
+sequence_placeholder = tf.placeholder(tf.float32, shape = [T,mini_batch_size ,H,W,C])
+image_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size ,H,W,C])
 #need the 2 because of one-hot encoding for softmax
-label_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size, NX,NY,NZ, 2]);
+label_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size , NX,NY,NZ, 2]);
 
 ## specify total graph
 sequence = [image_placeholder for i in range(T)]
@@ -88,7 +90,7 @@ outputs = tf.contrib.layers.softmax(logits)
 print(outputs.shape)
 print(label_placeholder.shape)
 loss = tf.nn.softmax_cross_entropy_with_logits_v2(
-    labels=label_placeholder, #this poses a problem for mini batch learning
+    labels=label_placeholder,
     logits=logits,
 )
 loss = tf.layers.flatten(loss)
@@ -109,23 +111,22 @@ saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
-epochs = 1100;
+epochs = 400;
 loss_history = list(); accuracy = list()
 
 num_batches = int(batch_size/mini_batch_size);
 for epoch in range(epochs):
 
-    for i in range(mini_batch_size):
+    for i in range(num_batches):
         #need to determine X_final
         start = i*mini_batch_size; end = (i+1)*mini_batch_size;
-
+        print(sample_keys[start:end])
         y_batch = y_one_hot[start:end];
+        y_batch_flat = y[start:end]
         # print('y_batch shape')
         # print(y_batch.shape)
         X_batch = X_nparr[start:end, :, :, :, :]
-
         X_batch = np.transpose(X_batch, axes=[1, 0, 2, 3, 4])
-
         ## convert this back to a list of arrs
         X_final = [X_batch[t, :, :, :, :] for t in range(T)];
 
@@ -140,14 +141,61 @@ for epoch in range(epochs):
         #reconfigure feed_dict to accept a place_holder for y
         prediction = sess.run(predictions, feed_dict = feed_dict_input)
 
-        accuracy.append(np.mean(prediction == y_batch))
+        accuracy.append(np.mean(prediction == y_batch_flat))
 
     print('epoch: '+str(epoch)+' loss: '+str(loss_epoch))
     print(prediction.shape)
-    print(np.mean(prediction == y))
+    print(np.mean(prediction == y_batch_flat))
     loss_history.append(loss_epoch);
         #predictions = tf.argmax(outputs, axis = 4)
 
+saver.save(sess, './R2N2_model_weights', global_step = epochs)
+
+
+## run test batch
+f = open(os.path.join(data_dir, 'R2N2_128_batch_1.p'), 'rb');
+batch_sample_2 = pickle.load(f);
+X, y = pickle_to_data.unravel_batch_pickle(batch_sample_2)
+X_nparr = np.array(X);
+batch_size,T,H,W,C = X_nparr.shape;
+num_batches = int(128/mini_batch_size);
+test_iou = list();
+print('run test case')
+
+for i in range(num_batches-1):
+    start = i * mini_batch_size;
+    end = (i + 1) * mini_batch_size;
+
+    X_batch = X_nparr[start:end, :, :, :, :]
+
+    X_batch = np.transpose(X_batch, axes=[1, 0, 2, 3, 4])
+
+    ## convert this back to a list of arrs
+    X_final = [X_batch[t, :, :, :, :] for t in range(T)];
+
+
+    ## perform downsampling
+    down_y = list();
+    strides = [1,1,1]
+    for i in range(len(y)):
+        down_y.append(subsample_voxel.downsample(y[i], strides))
+    sample_model = down_y[0]; print(sample_model.shape)
+    [NX,NY,NZ] = sample_model.shape;
+    ## convert everything to arrays
+    y = np.array(down_y)
+    y_one_hot = np.stack((y==0, y==1))
+    y_one_hot = np.transpose(y_one_hot, axes = [1,2,3,4,0])
+    feed_dict_input = {i: d for i, d in zip(sequence, X_final)}; #size has to be fixed...
+    feed_dict_input[label_placeholder] = y_one_hot[start:end];
+    test_loss= sess.run(loss, feed_dict=feed_dict_input)
+    test_prediction = sess.run(predictions, feed_dict=feed_dict_input)
+    for k in range(mini_batch_size):
+        print(iou.IoU_3D(y[k, :, :, :], test_prediction[k, :, :, :]))
+        test_iou.append(iou.IoU_3D(y[k, :, :, :], test_prediction[k, :, :, :]))
+
+print('test_loss')
+print(test_loss)
+print(np.mean(test_iou))
 
 #Now, save the graph
 import matplotlib.pyplot as plt
