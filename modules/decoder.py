@@ -2,7 +2,7 @@ import numpy as np
 import random
 import tensorflow as tf
 
-def decoder(inputs, n_deconvfilter):
+def decoder_simple(inputs, n_deconvfilter):
     '''
     :param inputs: should have shape (N,X,Y,Z,C)
     :param n_deconvfilter:
