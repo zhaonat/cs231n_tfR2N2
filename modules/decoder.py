@@ -33,7 +33,7 @@ def decoder_simple(inputs, n_deconvfilter):
     return logits
 
 # Residual decoder using con3d_transpose layers
-def decoder_res_conv3dTranspose( inputs, in_dim, batch_size, n_deconvfilter):
+def decoder_res_conv3dTranspose( inputs, n_deconvfilter):
     # initializer = tf.variance_scaling_initializer(scale=2.0)
 
     # Define the model structure
@@ -71,7 +71,7 @@ def decoder_res_conv3dTranspose( inputs, in_dim, batch_size, n_deconvfilter):
 
 
 # Residual decoder using UpSampling3D layers
-def decoder_res_upsample( inputs, in_dim, batch_size, n_deconvfilter):
+def decoder_res_upsample( inputs, n_deconvfilter):
     # initializer = tf.variance_scaling_initializer(scale=2.0)
 
     # Define the model structure
