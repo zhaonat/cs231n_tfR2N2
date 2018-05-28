@@ -142,7 +142,7 @@ def train_my_lstm():
     elif problem_type == 'regression':
         loss = tf.nn.l2_loss(truth - outputs) / batch_size
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.01) # lr = 0.05 for Nh = 2
+    optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
     optimizer = optimizer.minimize(loss)
 
     # Initialize and run the graph
