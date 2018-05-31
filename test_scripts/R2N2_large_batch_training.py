@@ -3,6 +3,7 @@ import numpy as np
 from modules import encoder
 from modules import decoder
 from modules import simple_lstm
+from modules import my_3d_lstm
 import settings
 import os
 import pickle
@@ -15,6 +16,7 @@ this takes a while to run
 from data_processing import subsample_voxel
 data_dir = os.path.join(settings.ROOT_DIR, 'data', 'shape_net_training_test');
 f = open(os.path.join(data_dir, 'R2N2_1024_batch_1.p'), 'rb');
+#f = open(os.path.join(data_dir, 'R2N2_128_batch_1.p'), 'rb');
 
 batch_sample = pickle.load(f);
 print(batch_sample.keys())
@@ -70,7 +72,9 @@ encoded_sequence = tf.transpose(encoded_sequence, perm = [1,0,2])
 print(encoded_sequence.shape)
 
 ## after we use the encoder, we should have a sequence of dense outputs
-conv_lstm_hidden = simple_lstm.simple_lstm(encoded_sequence);
+#conv_lstm_hidden = simple_lstm.simple_lstm(encoded_sequence);
+conv_lstm_hidden = my_3d_lstm.my_3d_lstm(encoded_sequence, cube_size=4, num_channels=4, filter_size=3)
+
 
 print('lstm hidden shape:')
 print(conv_lstm_hidden.shape)
@@ -78,7 +82,7 @@ print(conv_lstm_hidden.shape)
 ##decode the lstm output, which is just the hidden state, 3D
 # pass it through the decoder
 n_deconvfilter = [128, 128, 128, 64, 32, 2]
-logits = decoder.decoder(conv_lstm_hidden, n_deconvfilter)
+logits = decoder.decoder_res_conv3dTranspose(conv_lstm_hidden, n_deconvfilter)
 
 #squeeze logits so it is 4 dimensional
 logits = tf.squeeze(logits);
@@ -142,7 +146,8 @@ for epoch in range(epochs):
         prediction = sess.run(predictions, feed_dict = feed_dict_input)
 
         accuracy.append(np.mean(prediction == y_batch_flat))
-
+    for k in range(mini_batch_size):
+        print(iou.IoU_3D(y_batch_flat[k, :, :, :], prediction[k, :, :, :]))
     print('epoch: '+str(epoch)+' loss: '+str(loss_epoch))
     print(prediction.shape)
     print(np.mean(prediction == y_batch_flat))

@@ -56,3 +56,57 @@ def encoder_z(input_batch):
     # run this
     return dense;
 
+def res_block(input_tensor, kernel_size, filters):
+    '''
+    resnet is simply a number of these blocks stacked togther
+    #for the shortcut, we need to add in a 1x1 conv in situations
+    # where input and output shapes are not equal (by shape, we mean num_channels)
+
+    :param input
+    :return:
+    '''
+    filters1, filters2, filters3 = filters
+    shortcut = input_tensor ## preserve the input
+    #1d conv so we can scale the num_channels
+    x = tf.layers.conv2d(input_tensor, filters = filters1, kernel_size = (1, 1))
+    x = tf.layers.batch_normalization(x)
+    x = tf.nn.relu(x)
+
+    #apply the conv
+    x = tf.layers.Conv2D(filters2, kernel_size,
+               padding='same')(x)
+    x = tf.layers.batch_normalization(x)
+    x = tf.nn.relu(x)
+
+    #1d conv so we can project back to the original conv size
+    x = tf.layers.conv2d(x, filters = filters3, kernel_size =(1, 1))
+    x = tf.layers.batch_normalization(x)
+
+    x = tf.add(x, input_tensor)
+    x = tf.nn.relu(x);
+    return x
+
+def encoder_resnet(input_batch, num_layers = 5):
+    conv7 = tf.layers.conv2d(inputs=input_batch, filters=32, kernel_size=(2, 2))
+    # use a for loop for the remaining 5 3x3 convs
+    pool7 = conv7;
+    kernel_size = (2,2)
+    filter_array = [64,64,32]
+    for i in range(2):
+        conv_out = res_block(pool7, kernel_size, filters = filter_array)
+    kernel_size = (2,2);
+
+    for i in range(2):
+        conv_out = res_block(conv_out, kernel_size, filters = filter_array)
+
+
+    batch_norm = tf.layers.batch_normalization(conv_out)
+    dropout = tf.layers.dropout(batch_norm, rate=0.4);  # rate is the drop rate
+    pool3 = tf.layers.max_pooling2d(inputs=dropout, pool_size=[2, 2], strides=2)
+    pool7 = pool3;
+    # add in dense layer
+    pool_flat = tf.contrib.layers.flatten(pool7)
+    dense = tf.layers.dense(inputs=pool_flat, units=1024, activation=tf.nn.relu)
+
+    # run this
+    return dense;
