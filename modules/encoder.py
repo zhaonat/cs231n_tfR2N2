@@ -86,18 +86,43 @@ def res_block(input_tensor, kernel_size, filters):
     x = tf.nn.relu(x);
     return x
 
-def encoder_resnet(input_batch, num_layers = 5):
+def encoder_resnet(input_batch):
     conv7 = tf.layers.conv2d(inputs=input_batch, filters=32, kernel_size=(2, 2))
     # use a for loop for the remaining 5 3x3 convs
-    pool7 = conv7;
+    inputs = conv7;
     kernel_size = (2,2)
     filter_array = [64,64,32]
+
+    ## first downsampling conv layer
+    inputs = tf.layers.batch_normalization(inputs);
+    inputs = tf.nn.relu(inputs);
+
+    ## define first resblock
     for i in range(2):
-        conv_out = res_block(pool7, kernel_size, filters = filter_array)
+        inputs = res_block(inputs, kernel_size, filters = filter_array)
     kernel_size = (2,2);
 
-    for i in range(2):
-        conv_out = res_block(conv_out, kernel_size, filters = filter_array)
+    ## second downsampling conv layer
+    inputs = tf.layers.conv2d(inputs, filters=32, kernel_size=(3,3))
+    inputs = tf.layers.batch_normalization(inputs);
+    inputs = tf.nn.relu(inputs);
+    inputs = tf.layers.max_pooling2d(inputs, pool_size=(2,2), strides=(2, 2))
+
+    ## define second resblock
+    filter_array2 = [128,128, 32];
+    for i in range(3):
+        conv_out = res_block(inputs, kernel_size, filters = filter_array2)
+
+    ## third downsampling conv layer
+    inputs = tf.layers.conv2d(conv_out, filters=32, kernel_size=(2,2))
+    inputs = tf.layers.batch_normalization(inputs);
+    inputs = tf.nn.relu(inputs);
+    inputs = tf.layers.max_pooling2d(inputs, pool_size=(2,2), strides=(2, 2))
+
+    ## define second resblock
+    filter_array2 = [64,64,32];
+    for i in range(3):
+        conv_out = res_block(inputs, kernel_size, filters = filter_array2)
 
 
     batch_norm = tf.layers.batch_normalization(conv_out)

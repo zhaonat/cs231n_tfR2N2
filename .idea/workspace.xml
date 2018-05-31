@@ -3,9 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="7dc34952-8c74-4573-8cbe-f2ffd42934b5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/R2N2_architecture.py" afterPath="$PROJECT_DIR$/modules/R2N2_architecture.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/encoder.py" afterPath="$PROJECT_DIR$/modules/encoder.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test_scripts/R2N2_large_batch_training.py" afterPath="$PROJECT_DIR$/test_scripts/R2N2_large_batch_training.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test_scripts/checkpoint" afterPath="$PROJECT_DIR$/test_scripts/checkpoint" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/ResNet_Module_Test-checkpoint.ipynb" afterPath="$PROJECT_DIR$/notebooks/.ipynb_checkpoints/ResNet_Module_Test-checkpoint.ipynb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/notebooks/ResNet_Module_Test.ipynb" afterPath="$PROJECT_DIR$/notebooks/ResNet_Module_Test.ipynb" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,18 +17,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="R2N2_more_advanced.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test_scripts/R2N2_more_advanced.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2222">
-              <caret line="111" column="0" lean-forward="false" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="R2N2_large_batch_training.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test_scripts/R2N2_large_batch_training.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -40,11 +29,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="encoder.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="encoder.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/encoder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1375">
-              <caret line="112" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+            <state relative-caret-position="2497">
+              <caret line="137" column="0" lean-forward="true" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -94,11 +83,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="R2N2_multifile_ultra_large_training.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="R2N2_multifile_ultra_large_training.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test_scripts/R2N2_multifile_ultra_large_training.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="924">
-              <caret line="53" column="28" lean-forward="false" selection-start-line="53" selection-start-column="17" selection-end-line="53" selection-end-column="28" />
+            <state relative-caret-position="-1717">
+              <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -109,8 +98,8 @@
       <file leaf-file-name="R2N2_architecture.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/R2N2_architecture.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="858">
-              <caret line="42" column="47" lean-forward="false" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
+            <state relative-caret-position="407">
+              <caret line="40" column="46" lean-forward="false" selection-start-line="40" selection-start-column="46" selection-end-line="40" selection-end-column="46" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -170,11 +159,11 @@
         <option value="$PROJECT_DIR$/data_processing/concatenate_shapenet_pickle_batches.py" />
         <option value="$PROJECT_DIR$/data_processing/model_to_numpy.py" />
         <option value="$PROJECT_DIR$/test_scripts/mini_batch_evaluator_function.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/modules/R2N2_architecture.py" />
         <option value="$PROJECT_DIR$/test_scripts/R2N2_multifile_ultra_large_training.py" />
         <option value="$PROJECT_DIR$/test_scripts/R2N2_large_batch_training.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/modules/encoder.py" />
+        <option value="$PROJECT_DIR$/modules/R2N2_architecture.py" />
       </list>
     </option>
   </component>
@@ -215,7 +204,7 @@
             <path>
               <item name="cs231n_Project" type="b2602c69:ProjectViewProjectNode" />
               <item name="cs231n_Project" type="462c0819:PsiDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="test_scripts" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -230,19 +219,19 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\data_processing" />
-      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\test_scripts" />
-      <recent name="D:\Documents\Classes\CS231n\cs231n_Project" />
-      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\modules" />
-      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\notebooks" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Documents\Classes\CS231n\cs231n_Project\saved_models" />
       <recent name="D:\Documents\Classes\CS231n\cs231n_Project" />
       <recent name="D:\Documents\Classes\CS231n\cs231n_Project\data\shape_net_training_test" />
       <recent name="D:\Documents\Classes\CS231n\cs231n_Project\data_sample" />
       <recent name="D:\Documents\Classes\CS231n\cs231n_Project\data_processing" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\data_processing" />
+      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\test_scripts" />
+      <recent name="D:\Documents\Classes\CS231n\cs231n_Project" />
+      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\modules" />
+      <recent name="D:\Documents\Classes\CS231n\cs231n_Project\notebooks" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -257,7 +246,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.R2N2_large_batch_training">
+  <component name="RunManager" selected="Python.R2N2_multifile_ultra_large_training">
     <configuration name="R2N2_large_batch_training" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -459,8 +448,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.R2N2_large_batch_training" />
-        <item index="1" class="java.lang.String" itemvalue="Python.R2N2_multifile_ultra_large_training" />
+        <item index="0" class="java.lang.String" itemvalue="Python.R2N2_multifile_ultra_large_training" />
+        <item index="1" class="java.lang.String" itemvalue="Python.R2N2_large_batch_training" />
         <item index="2" class="java.lang.String" itemvalue="Python.model_to_numpy" />
         <item index="3" class="java.lang.String" itemvalue="Python.test_R2N2" />
         <item index="4" class="java.lang.String" itemvalue="Python.intersection_over_union" />
@@ -486,8 +475,8 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15846339" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32524806" sideWeight="0.30882353" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3261105" sideWeight="0.6911765" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32524806" sideWeight="0.31212485" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32524806" sideWeight="0.68787515" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.463434" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -733,33 +722,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="44">
-          <caret line="2" column="3" lean-forward="false" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/R2N2_architecture.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="858">
-          <caret line="42" column="47" lean-forward="false" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test_scripts/R2N2_multifile_ultra_large_training.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="924">
-          <caret line="53" column="28" lean-forward="false" selection-start-line="53" selection-start-column="17" selection-end-line="53" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/decoder.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="726">
@@ -806,11 +768,39 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="3" column="5" lean-forward="false" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/encoder.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1375">
-          <caret line="112" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+        <state relative-caret-position="2497">
+          <caret line="137" column="0" lean-forward="true" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/R2N2_architecture.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="407">
+          <caret line="40" column="46" lean-forward="false" selection-start-line="40" selection-start-column="46" selection-end-line="40" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_scripts/R2N2_multifile_ultra_large_training.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1717">
+          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

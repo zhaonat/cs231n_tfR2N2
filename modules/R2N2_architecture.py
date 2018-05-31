@@ -41,7 +41,7 @@ def R2N2_model(image_placeholder, label_placeholder, mini_batch_size, H,W,C, NX,
     ##decode the lstm output, which is just the hidden state, 3D
     # pass it through the decoder
     n_deconvfilter = [128, 128, 128, 64, 32, 2]
-    logits = decoder.decoder(conv_lstm_hidden, n_deconvfilter)
+    logits = decoder.decoder_res_upsample(conv_lstm_hidden, n_deconvfilter)
 
     # squeeze logits so it is 4 dimensional
     logits = tf.squeeze(logits);
