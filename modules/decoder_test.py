@@ -46,7 +46,7 @@ def decoder_res_conv3dTranspose( inputs, n_deconvfilter):
 
     # Define the model structure
     # X = tf.keras.layers.UpSampling3D( size = [2, 2, 2] )(inputs) #0.71, 0.70
-    unpool1 = tf.layers.conv3d_transpose( inputs=inputs, n_deconvfilter[1] , kernel_size=(2,2,2), strides = 2, padding="same") #0.75
+    unpool1 = tf.layers.conv3d_transpose( inputs=inputs, filters=n_deconvfilter[1] , kernel_size=(2,2,2), strides = 2, padding="same") #0.75
     X = tf.layers.conv3d( inputs = unpool1, filters = n_deconvfilter[1], kernel_size = 3, padding="same", activation = tf.nn.leaky_relu)
     X = tf.layers.conv3d( inputs = X, filters = n_deconvfilter[1], kernel_size = 3, padding="same", activation = tf.nn.leaky_relu)
     X = X + unpool1
