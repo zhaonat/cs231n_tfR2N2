@@ -109,7 +109,7 @@ def encoder_resnet(input_batch):
     inputs = tf.layers.max_pooling2d(inputs, pool_size=(2,2), strides=(2, 2))
 
     ## define second resblock
-    filter_array2 = [128,128, 32];
+    filter_array2 = [64,64, 32];
     for i in range(3):
         conv_out = res_block(inputs, kernel_size, filters = filter_array2)
 
