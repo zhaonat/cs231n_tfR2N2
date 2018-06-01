@@ -3,6 +3,7 @@
 analyzes the shapenet core models and converts them to 3d numpy arrays
 '''
 import os
+import gzip
 import numpy as np
 import binvox_rw as brp
 import subsample_voxel as sv
@@ -39,46 +40,62 @@ data_dict = dict();
 counter = 1;
 batch_counter = 1
 data_dict = dict();
-batch_size = 1600
-for item in os.listdir(os.path.join(model_dir, '02691156')):
-    counter+=1;
-    #print('item: '+str(counter))
-    model_id = item;
-    if(model_id in data_dict.keys() ):
-        continue;
-    data_dict[model_id] = dict();
-    sequence_dir = os.path.join(rendering_dir, '02691156', model_id, 'rendering');
-    #step 1: iterate through all images in the rendering directory
-    image_sequence = list();
-    for file in os.listdir(sequence_dir):
-        if('.png' in file):
-            image = mpimg.imread(os.path.join(sequence_dir, file));
-            image_sequence.append(image);
-    data_dict[model_id]['image_sequence'] = image_sequence;
+batch_size = 512
 
-    #step 2: load up the object model
-    voxel_dir = os.path.join(model_dir, '02691156', model_id, 'models');
-    file = os.path.join(voxel_dir, 'model_normalized.solid.binvox');
-    with open(file, 'rb') as f:
-        model = brp.read_as_3d_array(f)
+search_dirs = ['02691156', '02828884', '04530566', '04401088']
+## cycle through the shapenet rendering...somehow we have many less renderings than cores...
+for search_dir in os.listdir(os.path.join(rendering_dir)):
+#
+# for search_dir in search_dirs:
 
-    ## subsample the voxel model
-    sub_image = model.data[:, 0:32, :] #doing this crop is sufficient!
-    print(np.sum(sub_image) / np.prod(sub_image.shape))
-    sampled = sv.downsample(sub_image, stride=[4, 1, 4])
-    print(sampled.shape)
-    data_dict[model_id]['voxel_model'] = sampled;
-    # if(counter % batch_size == 0):
-    #     print('batch done');
-    #     print(data_dict.keys())
-    #     pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
-    #     batch_counter+=1;
-    #     data_dict = dict();
+    for item in os.listdir(os.path.join(model_dir, search_dir)):
+        counter += 1;
 
-    if(counter> batch_size):
-        break;
-print('batch done');
-print(data_dict.keys())
-pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
-batch_counter+=1;
-data_dict = dict();
+        #print('item: '+str(counter))
+        model_id = item;
+        if(model_id in data_dict.keys() ):
+            continue;
+        data_dict[model_id] = dict();
+
+
+        #if the model id cannot be found
+        if(not os.path.isdir(os.path.join(rendering_dir, search_dir, model_id))):
+            continue;
+
+        sequence_dir = os.path.join(rendering_dir, search_dir, model_id, 'rendering');
+        #step 1: iterate through all images in the rendering directory
+        image_sequence = list();
+        for file in os.listdir(sequence_dir):
+            if('.png' in file):
+                image = mpimg.imread(os.path.join(sequence_dir, file));
+                image_sequence.append(image);
+        data_dict[model_id]['image_sequence'] = image_sequence;
+
+        #step 2: load up the object model
+        voxel_dir = os.path.join(model_dir, search_dir, model_id, 'models');
+        file = os.path.join(voxel_dir, 'model_normalized.solid.binvox');
+        with open(file, 'rb') as f:
+            model = brp.read_as_3d_array(f)
+
+        ## subsample the voxel model
+        sub_image = model.data[:, 0:32, :] #doing this crop is sufficient!
+        print(np.sum(sub_image) / np.prod(sub_image.shape))
+        sampled = sv.downsample(sub_image, stride=[4, 1, 4])
+        print('samples processessed: '+str(counter))
+        data_dict[model_id]['voxel_model'] = sampled;
+        if(counter % batch_size == 0):
+            print('batch done, we have: '+str(counter)+' samples processed');
+            print(data_dict.keys())
+            pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'origin_'+search_dir+'.p', 'wb'));
+            batch_counter+=1;
+            data_dict = dict();
+
+        if(counter> 40*batch_size):
+            break;
+
+print('total_samples_processed: '+str(counter))
+# print('batch done');
+# print(data_dict.keys())
+# pickle.dump(data_dict, open('R2N2_'+str(batch_size)+'_batch_'+str(batch_counter)+'.p', 'wb'));
+# batch_counter+=1;
+# data_dict = dict();
