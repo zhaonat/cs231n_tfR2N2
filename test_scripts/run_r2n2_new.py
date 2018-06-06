@@ -16,17 +16,17 @@ from data_processing import intersection_over_union as iou
 from data_processing import subsample_voxel
 import time
 
-ROOT_DIR = 'C:\\Users\\Yijun Jiang\\Desktop\\3D_R2N2'
+ROOT_DIR = '/home/ubuntu/3DR2N2'
 print('data loading...')
-data_dir = os.path.join(ROOT_DIR, 'dataset_old')
+data_dir = os.path.join(ROOT_DIR, 'dataset')
 f = open(os.path.join(data_dir, 'planes', \
-                      'planes_cropped_grayscale','planes_02691156_4045_batch_cropped_grayscale.p'), 'rb')
+                      'planes_02691156_4045_batch_cropped_grayscale.p'), 'rb')
 #f = open(os.path.join(data_dir, 'R2N2_128_batch_1.p'), 'rb')
 class_name = 'planes'
 X, y  = pickle.load(f)
 print('data loaded')
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
 ## train test split
 print('train shape:', X_train.shape)
 print('test shape:', X_test.shape)
@@ -39,13 +39,13 @@ print('output shape:', y_train.shape)
 batch_size, NX, NY, NZ = y_train.shape
 
 ## if you want, take a smaller subset to test
-subset = 32 #2048
+subset = 2048
 X_train = X_train[0:subset]
 y_train = y_train[0:subset]
 
 batch_size, T, H, W, C = X_train.shape
 
-epochs = 10 #1000
+epochs = 1000
 mini_batch_size = 32
 
 #need the 2 because of one-hot encoding for softmax
@@ -154,7 +154,7 @@ training_iou = []
 
 save_every = 20
 print_every = 1
-draw_every = 1
+draw_every = 50
 for epoch in range(epochs):
 
     print('------------------------------------------------------------')
@@ -188,12 +188,13 @@ for epoch in range(epochs):
         accuracy = np.mean(prediction == y_batch)
         training_accuracy.append(accuracy)
 
-    toc = time.time()
-
     epoch_training_iou = []
     for j in range(mini_batch_size):
         epoch_training_iou.append(iou.IoU_3D(y_batch[j], prediction[j]))
     training_iou.append(np.mean(epoch_training_iou))
+    loss_history.append(loss_epoch)
+
+    toc = time.time()
 
     if epoch % print_every == 0:
         print('time elapsed for this epoch:', toc - tic)
@@ -201,14 +202,15 @@ for epoch in range(epochs):
         print('loss:', loss_epoch)
         print('accuracy:', accuracy)
 
-    loss_history.append(loss_epoch)
-    if(epoch % save_every == 0 and epoch > 1): #save it occassionally in case we stop the run
+    if(epoch % save_every == 0 and epoch > 0): #save it occassionally in case we stop the run
         pickle.dump([loss_history, training_iou, training_accuracy], open('gray_scale_planes_training_data.p', 'wb'))
         saver.save(sess, './grayscale_plane_R2N2_model_weights', global_step=epoch)
+
         #we can artificially rename the checkpoint? probably not
         #predictions = tf.argmax(outputs, axis = 4)
 
-    if(epoch % draw_every == 0):
+    if(epoch % draw_every == 0 and epoch > 0):
+        pickle.dump([prediction, y_batch], open('epoch_'+str(epoch)+'_predictions.p', 'wb'))
         for j in range(mini_batch_size):
             fig = plt.figure(figsize = (20,8))
             ax = fig.add_subplot(1, 2, 1, projection='3d')
@@ -219,7 +221,8 @@ for epoch in range(epochs):
             ax.voxels(y_batch[j], edgecolor='k', facecolor='blue')
             ax.set(xlabel='x', ylabel='y', zlabel='z', title='original model')
 
-            plt.save('epoch_' + str(epoch) + '_sample_' + str(j) + '.jpg')
+            plt.savefig('sample_' + str(j) + '_epoch_' + str(epoch) + '.jpg')
+            plt.close()
 
     print('finished epoch:', epoch)
 
