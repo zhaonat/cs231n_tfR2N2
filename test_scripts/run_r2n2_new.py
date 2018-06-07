@@ -5,6 +5,8 @@ from modules import decoder
 from modules import simple_lstm
 from modules import my_3d_lstm
 from modules import my_3d_gru
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.model_selection import train_test_split
@@ -16,10 +18,10 @@ from data_processing import intersection_over_union as iou
 from data_processing import subsample_voxel
 import time
 
-ROOT_DIR = '/home/ubuntu/3DR2N2'
+ROOT_DIR = '/home/shared/CS231n/project/3D_R2N2'
 print('data loading...')
 data_dir = os.path.join(ROOT_DIR, 'dataset')
-f = open(os.path.join(data_dir, 'planes', \
+f = open(os.path.join(data_dir, 'planes_cropped_grayscale', \
                       'planes_02691156_4045_batch_cropped_grayscale.p'), 'rb')
 #f = open(os.path.join(data_dir, 'R2N2_128_batch_1.p'), 'rb')
 class_name = 'planes'
@@ -45,14 +47,14 @@ y_train = y_train[0:subset]
 
 batch_size, T, H, W, C = X_train.shape
 
-epochs = 1000
+epochs = 500
 mini_batch_size = 32
 
 #need the 2 because of one-hot encoding for softmax
 label_placeholder = tf.placeholder(tf.float32, shape = [mini_batch_size,NX,NY,NZ], name = 'voxel')
 
 ## =========================== TUNE-ABLE PARAMETERS ================================================##
-sub_sequence_length = 6
+sub_sequence_length = 16
 conv_lstm_hidden_channels = 24
 
 sequence = []
@@ -154,7 +156,7 @@ training_iou = []
 
 save_every = 20
 print_every = 1
-draw_every = 50
+draw_every = 10
 for epoch in range(epochs):
 
     print('------------------------------------------------------------')
@@ -203,15 +205,16 @@ for epoch in range(epochs):
         print('accuracy:', accuracy)
 
     if(epoch % save_every == 0 and epoch > 0): #save it occassionally in case we stop the run
-        pickle.dump([loss_history, training_iou, training_accuracy], open('gray_scale_planes_training_data.p', 'wb'))
-        saver.save(sess, './grayscale_plane_R2N2_model_weights', global_step=epoch)
+        pickle.dump([loss_history, training_iou, training_accuracy], open('./results/gray_scale_planes_training_data.p', 'wb'))
+        saver.save(sess, './results/grayscale_plane_R2N2_model_weights', global_step=epoch)
 
         #we can artificially rename the checkpoint? probably not
         #predictions = tf.argmax(outputs, axis = 4)
 
-    if(epoch % draw_every == 0 and epoch > 0):
-        pickle.dump([prediction, y_batch], open('epoch_'+str(epoch)+'_predictions.p', 'wb'))
-        for j in range(mini_batch_size):
+    if(epoch % draw_every == 0):
+        print('saving figures...')
+        pickle.dump([prediction, y_batch], open('./results/epoch_'+str(epoch)+'_predictions.p', 'wb'))
+        for j in range(10):
             fig = plt.figure(figsize = (20,8))
             ax = fig.add_subplot(1, 2, 1, projection='3d')
             ax.voxels(prediction[j], edgecolor='k')
@@ -221,15 +224,18 @@ for epoch in range(epochs):
             ax.voxels(y_batch[j], edgecolor='k', facecolor='blue')
             ax.set(xlabel='x', ylabel='y', zlabel='z', title='original model')
 
-            plt.savefig('sample_' + str(j) + '_epoch_' + str(epoch) + '.jpg')
+            plt.savefig('./results/figures/'+ 'sample_' + str(j) + '_epoch_' + str(epoch) + '.jpg')
             plt.close()
+        if epoch > 100:
+            draw_every = 50
+        print('figures saved!')
 
     print('finished epoch:', epoch)
 
 
 print('training weights saving...')
 save_path = saver.save(sess, "./" + class_name + ".ckpt")
-saver.save(sess, './grayscale_plane_R2N2_model_weights', global_step = epochs)
+saver.save(sess, './results/grayscale_plane_R2N2_model_weights', global_step = epochs)
 print('training weights saved')
 
 
@@ -248,6 +254,7 @@ for i in range(num_test_batches):
     end = (i+1) * mini_batch_size
 
     X_batch = X_test[start:end]
+    y_batch = y_test[start:end]
 
     X_batch = np.transpose(X_batch, axes=[1, 0, 2, 3, 4])
 
@@ -256,18 +263,35 @@ for i in range(num_test_batches):
 
     ## perform downsampling
     feed_dict_input = {i: d for i, d in zip(sequence, X_final)} #size has to be fixed...
-    feed_dict_input[label_placeholder] = y_test[start:end]
-    test_loss= sess.run(loss, feed_dict=feed_dict_input)
-    test_prediction = sess.run(outputs, feed_dict=feed_dict_input)
+    feed_dict_input[label_placeholder] = y_batch
+
+    test_loss, test_prediction = sess.run([loss, outputs], feed_dict=feed_dict_input)
+#     print(test_loss)
+#     test_prediction = sess.run(outputs, feed_dict=feed_dict_input)
     test_prediction = test_prediction > 0.5
+    print('saving figures...')
     for k in range(mini_batch_size):
         # print(iou.IoU_3D(y[k], test_prediction[k]))
-        test_iou.append(iou.IoU_3D(y[k], test_prediction[k]))
+        test_iou.append(iou.IoU_3D(y_batch[k], test_prediction[k]))
+
+        fig = plt.figure(figsize = (20,8))
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        ax.voxels(test_prediction[k], edgecolor='k')
+        ax.set(xlabel='x', ylabel='y', zlabel='z', title='prediction')
+
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+        ax.voxels(y_batch[k], edgecolor='k', facecolor='blue')
+        ax.set(xlabel='x', ylabel='y', zlabel='z', title='original model')
+
+        plt.savefig('./results/figures/'+ 'test_sample_' + str(k) + '_minibatch_' + str(i) + '.jpg')
+        plt.close()
+
+    print('figures saved!')
 
 print('test_loss:', test_loss)
 print('number of test examples:', len(test_iou))
 print('test iou,', np.mean(test_iou))
 
 print('final results saving...')
-pickle.dump([loss_history, training_iou, training_accuracy, test_iou], open('gray_scale_planes_training_data_final.p', 'wb'))
+pickle.dump([loss_history, training_iou, training_accuracy, test_iou], open('./results/gray_scale_planes_training_data_final.p', 'wb'))
 print('final results saved')
